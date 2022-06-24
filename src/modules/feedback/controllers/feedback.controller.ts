@@ -3,25 +3,25 @@ import { Observable, map, switchMap, of } from 'rxjs';
 import { AuthTokenGuard } from 'src/modules/shared/guards/auth-token.guard';
 import { ApiResponse, ResponseCodes } from 'src/modules/shared/models/api-response';
 import { UpdateResult } from 'typeorm';
-import { Department } from '../models/department.entity';
-import { DepartmentService } from '../services/department.service';
+import { Feedback } from '../models/feedback.entity';
+import { FeedbackService } from '../services/feedback.service';
 
-@Controller('departments')
-export class DepartmentController {
-    private readonly logger = new Logger(DepartmentController.name);
-    constructor(public departmentService: DepartmentService) {
+@Controller('feedbacks')
+export class FeedbackController {
+    private readonly logger = new Logger(FeedbackController.name);
+    constructor(public feedbackService: FeedbackService) {
     }
 
     @UseGuards(AuthTokenGuard)
-    @Post('create')
+    @Post('')
     @Header('Cache-Control', 'none')
-    create(@Body() department: Department): Observable<ApiResponse> {
+    create(@Body() feedback: Feedback): Observable<ApiResponse> {
         let response = new ApiResponse();
-        const createdDepartmentResult$ = this.departmentService.create(department);
-        return createdDepartmentResult$.pipe(map((createdDepartment: Department) => {
+        const createdFeedbackResult$ = this.feedbackService.create(feedback);
+        return createdFeedbackResult$.pipe(map((createdFeedback: Feedback) => {
             response.code = ResponseCodes.SUCCESS.code;
             response.message = ResponseCodes.SUCCESS.message;
-            response.data = { ...createdDepartment };
+            response.data = { ...createdFeedback };
             return response;
         }));
     }
@@ -32,14 +32,14 @@ export class DepartmentController {
     findAll(@Query('page') page: number = 1, @Query('limit') limit: number = 10): Observable<ApiResponse> {
         let response = new ApiResponse();
 
-        return this.departmentService.findAll({ page, limit }).pipe(map((departmentsPagable) => {
-            const departmentItems = departmentsPagable.items;
-            const departmentItemsMeta = departmentsPagable.meta;
-            if (departmentItems.length > 0) {
+        return this.feedbackService.findAll({ page, limit }).pipe(map((feedbacksPagable) => {
+            const feedbackItems = feedbacksPagable.items;
+            const feedbackItemsMeta = feedbacksPagable.meta;
+            if (feedbackItems.length > 0) {
                 response.code = ResponseCodes.SUCCESS.code;
                 response.message = ResponseCodes.SUCCESS.message;
-                response.data = departmentItems;
-                response.meta = departmentItemsMeta;
+                response.data = feedbackItems;
+                response.meta = feedbackItemsMeta;
             } else {
                 response.code = ResponseCodes.NO_RECORD_FOUND.code;
                 response.message = ResponseCodes.NO_RECORD_FOUND.message;
@@ -48,15 +48,15 @@ export class DepartmentController {
         }));
     }
 
-    @Get(':departmentId')
+    @Get(':feedbackId')
     @Header('Cache-Control', 'none')
-    findOne(@Param('departmentId') departmentId: string): Observable<ApiResponse> {
+    findOne(@Param('feedbackId') feedbackId: string): Observable<ApiResponse> {
         let response = new ApiResponse();
-        return this.departmentService.findOne(departmentId).pipe(map((department) => {
-            if (department.hasId) {
+        return this.feedbackService.findOne(feedbackId).pipe(map((feedback) => {
+            if (feedback.hasId) {
                 response.code = ResponseCodes.SUCCESS.code;
                 response.message = ResponseCodes.SUCCESS.message;
-                response.data = department
+                response.data = feedback
             } else {
                 response.code = ResponseCodes.NO_RECORD_FOUND.code;
                 response.message = ResponseCodes.NO_RECORD_FOUND.message;
@@ -65,22 +65,22 @@ export class DepartmentController {
         }));
     }
 
-    @Put(':departmentId')
+    @Put(':feedbackId')
     @Header('Cache-Control', 'none')
-    update(@Param('departmentId') departmentId: string, @Body() department: Department): Observable<ApiResponse> {
+    update(@Param('feedbackId') feedbackId: string, @Body() feedback: Feedback): Observable<ApiResponse> {
         let response = new ApiResponse();
-        department.id = departmentId;
-        return this.departmentService.update(department).pipe(
-            switchMap((department: UpdateResult) => {
-                if (department.affected > 0) {
+        feedback.id = feedbackId;
+        return this.feedbackService.update(feedback).pipe(
+            switchMap((feedback: UpdateResult) => {
+                if (feedback.affected > 0) {
                     response.code = ResponseCodes.SUCCESS.code;
                     response.message = ResponseCodes.SUCCESS.message;
 
-                    return this.departmentService.findOne(departmentId).pipe(map((department) => {
-                        if (department.hasId) {
+                    return this.feedbackService.findOne(feedbackId).pipe(map((feedback) => {
+                        if (feedback.hasId) {
                             response.code = ResponseCodes.SUCCESS.code;
                             response.message = ResponseCodes.SUCCESS.message;
-                            response.data = department
+                            response.data = feedback
                         } else {
                             response.code = ResponseCodes.NO_RECORD_FOUND.code;
                             response.message = ResponseCodes.NO_RECORD_FOUND.message;
@@ -96,11 +96,11 @@ export class DepartmentController {
         )
     }
 
-    @Delete(':departmentId')
+    @Delete(':feedbackId')
     @Header('Cache-Control', 'none')
-    delete(@Param('departmentId') departmentId: string): Observable<ApiResponse> {
+    delete(@Param('feedbackId') feedbackId: string): Observable<ApiResponse> {
         let response = new ApiResponse();
-        return this.departmentService.delete(departmentId).pipe(map((role) => {
+        return this.feedbackService.delete(feedbackId).pipe(map((role) => {
             if (role.affected > 0) {
                 response.code = ResponseCodes.SUCCESS.code;
                 response.message = ResponseCodes.SUCCESS.message;

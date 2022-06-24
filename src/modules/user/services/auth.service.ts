@@ -30,7 +30,8 @@ export class AuthService {
                             username: user.username,
                             email: user.email,
                             id: user.id,
-                            role: user.role
+                            role: user.role,
+                            fullname:user.fullname
                         }
                         return this.generateAccessToken(jwtUser)
                             .pipe(switchMap(token => {
@@ -71,7 +72,8 @@ export class AuthService {
                     username: user.username,
                     email: user.email,
                     id: user.id,
-                    role: user.role
+                    role: user.role,
+                    fullname:user.fullname
                 }
                 return this.generateAccessToken(jwtUser);
             })

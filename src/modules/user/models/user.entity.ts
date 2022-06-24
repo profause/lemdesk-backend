@@ -15,7 +15,7 @@ export class User extends BaseModel{
     @Column('varchar',{
         nullable: true
     })
-    public departmentId?: string;
+    public department?: string;
 
     @Column({ unique: true,nullable: true})
     public email?: string;
@@ -54,8 +54,6 @@ export class User extends BaseModel{
         nullable: true
     })
     public profileImage: string;
-
-    public department?: string;
 
     @BeforeInsert()
     beforeInsertListener(){

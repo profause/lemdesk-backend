@@ -11,6 +11,10 @@ import { SharedModule } from '../shared/shared.module';
 import { DepartmentModule } from '../department/department.module';
 import { Department } from '../department/models/department.entity';
 import { ServiceTicket } from '../service-management/models/service-ticket.entity';
+import { ServiceManagementModule } from '../service-management/service-management.module';
+import { ServiceTicketComment } from '../service-management/models/service-ticket-comment.entity';
+import { Feedback } from '../feedback/models/feedback.entity';
+import { FeedbackModule } from '../feedback/feedback.module';
 
 @Module({
   imports: [
@@ -18,6 +22,8 @@ import { ServiceTicket } from '../service-management/models/service-ticket.entit
     RoleModule,
     SharedModule,
     DepartmentModule,
+    ServiceManagementModule,
+    FeedbackModule,
     ConfigModule.forRoot({
       envFilePath: ['src/configFiles/.dev.env', 'src/configFiles/.prod.env'],
       isGlobal: true
@@ -29,7 +35,9 @@ import { ServiceTicket } from '../service-management/models/service-ticket.entit
         User,
         Department,
         ServiceTicket,
-        Role
+        ServiceTicketComment,
+        Role,
+        Feedback
       ],
       synchronize: false,
       //subscribers: [DepartmentSubscriber],
