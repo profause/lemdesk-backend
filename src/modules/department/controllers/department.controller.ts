@@ -1,11 +1,14 @@
-import { Body, Controller, Delete, Get, Header, Logger, Param, Post, Put, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Header, Logger, Param, Post, Put, Query, UseGuards, UseInterceptors } from '@nestjs/common';
 import { Observable, map, switchMap, of } from 'rxjs';
 import { AuthTokenGuard } from 'src/modules/shared/guards/auth-token.guard';
 import { ApiResponse, ResponseCodes } from 'src/modules/shared/models/api-response';
 import { UpdateResult } from 'typeorm';
 import { Department } from '../models/department.entity';
 import { DepartmentService } from '../services/department.service';
+import { AuditLog } from 'src/modules/audit-log/utils/audit-log.decorator';
+import { AuditLogInterceptor } from 'src/modules/audit-log/interceptors/audit-log.interceptor';
 
+@UseInterceptors(AuditLogInterceptor)
 @Controller('departments')
 export class DepartmentController {
     private readonly logger = new Logger(DepartmentController.name);
@@ -14,6 +17,7 @@ export class DepartmentController {
 
     @UseGuards(AuthTokenGuard)
     @Post('create')
+    @AuditLog('Create Department')
     @Header('Cache-Control', 'none')
     create(@Body() department: Department): Observable<ApiResponse> {
         let response = new ApiResponse();
@@ -28,6 +32,7 @@ export class DepartmentController {
 
     @UseGuards(AuthTokenGuard)
     @Get('')
+    @AuditLog('Get Departments')
     @Header('Cache-Control', 'none')
     findAll(@Query('page') page: number = 1, @Query('limit') limit: number = 10): Observable<ApiResponse> {
         let response = new ApiResponse();
@@ -49,6 +54,7 @@ export class DepartmentController {
     }
 
     @Get(':departmentId')
+    @AuditLog('Get Department')
     @Header('Cache-Control', 'none')
     findOne(@Param('departmentId') departmentId: string): Observable<ApiResponse> {
         let response = new ApiResponse();
@@ -66,6 +72,7 @@ export class DepartmentController {
     }
 
     @Put(':departmentId')
+    @AuditLog('Update Department')
     @Header('Cache-Control', 'none')
     update(@Param('departmentId') departmentId: string, @Body() department: Department): Observable<ApiResponse> {
         let response = new ApiResponse();
@@ -97,6 +104,7 @@ export class DepartmentController {
     }
 
     @Delete(':departmentId')
+    @AuditLog('Delete Department')
     @Header('Cache-Control', 'none')
     delete(@Param('departmentId') departmentId: string): Observable<ApiResponse> {
         let response = new ApiResponse();

@@ -12,8 +12,8 @@ export class Department extends BaseModel {
     @Column('text', { unique: false, name: 'operations' })
     public operations?: string;
 
-    @DeleteDateColumn({ name: 'soft_delete_date' })
-    public softDeleteDate: Date;
+    @DeleteDateColumn({ name: 'soft_delete_date'})
+    public softDeleteDate?: Date;
 
     @BeforeInsert()
     beforeInsertListener() {

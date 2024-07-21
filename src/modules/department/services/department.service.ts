@@ -1,4 +1,3 @@
-import { TypeOrmQueryService } from '@nestjs-query/query-typeorm';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { IPaginationOptions, paginate } from 'nestjs-typeorm-paginate';
@@ -7,10 +6,10 @@ import { Repository } from 'typeorm';
 import { Department } from '../models/department.entity';
 
 @Injectable()
-export class DepartmentService extends TypeOrmQueryService<Department> {
+export class DepartmentService  {
     constructor(@InjectRepository(Department) public readonly departmentRepository: Repository<Department>,
     ) {
-        super(departmentRepository, { useSoftDelete: true })
+        //super(departmentRepository, { useSoftDelete: true })
     }
     public create(department: Department): Observable<Department> {
         const createdDepartment = this.departmentRepository.create(department);
@@ -20,9 +19,7 @@ export class DepartmentService extends TypeOrmQueryService<Department> {
     public findAll = (options: IPaginationOptions) => from(paginate<Department>(this.departmentRepository, options, {
         
     }));
-    public findOne = (departmentId: string) => from(this.departmentRepository.findOne(departmentId, {
-        
-    }));
+    public findOne = (id: string) => from(this.departmentRepository.findOneBy({id}));
 
     public findOne1(departmentId: string) {
         const result = this.departmentRepository.createQueryBuilder('department')

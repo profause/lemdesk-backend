@@ -16,7 +16,7 @@ export class AuthService {
     }
 
     public loginWithUsernameAndPassword(username: string, password: string): Observable<any> {
-        return from(this.userRepository.findOne({ username })).pipe(
+        return from(this.userRepository.findOneBy({ username })).pipe(
             switchMap(user => {
                 if (!user) {
                     return of(false);
@@ -63,7 +63,7 @@ export class AuthService {
     }
 
     public refreshToken(userId: string): Observable<any> {
-        return from(this.userRepository.findOne({ id: userId })).pipe(
+        return from(this.userRepository.findOneBy({ id: userId })).pipe(
             switchMap(user => {
                 if (!user) {
                     return of(false);

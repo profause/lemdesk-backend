@@ -1,11 +1,14 @@
-import { Body, Controller, Delete, Get, Header, Logger, Param, Post, Put, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Header, Logger, Param, Post, Put, Query, UseGuards, UseInterceptors } from '@nestjs/common';
 import { Observable, map, switchMap, of } from 'rxjs';
 import { AuthTokenGuard } from 'src/modules/shared/guards/auth-token.guard';
 import { ApiResponse, ResponseCodes } from 'src/modules/shared/models/api-response';
 import { UpdateResult } from 'typeorm';
 import { Feedback } from '../models/feedback.entity';
 import { FeedbackService } from '../services/feedback.service';
+import { AuditLog } from 'src/modules/audit-log/utils/audit-log.decorator';
+import { AuditLogInterceptor } from 'src/modules/audit-log/interceptors/audit-log.interceptor';
 
+@UseInterceptors(AuditLogInterceptor)
 @Controller('feedbacks')
 export class FeedbackController {
     private readonly logger = new Logger(FeedbackController.name);
@@ -13,6 +16,7 @@ export class FeedbackController {
     }
 
     @UseGuards(AuthTokenGuard)
+    @AuditLog('Create Feedback')
     @Post('')
     @Header('Cache-Control', 'none')
     create(@Body() feedback: Feedback): Observable<ApiResponse> {
@@ -28,6 +32,7 @@ export class FeedbackController {
 
     @UseGuards(AuthTokenGuard)
     @Get('')
+    @AuditLog('Get Feedbacks')
     @Header('Cache-Control', 'none')
     findAll(@Query('page') page: number = 1, @Query('limit') limit: number = 10): Observable<ApiResponse> {
         let response = new ApiResponse();
@@ -49,6 +54,7 @@ export class FeedbackController {
     }
 
     @Get(':feedbackId')
+    @AuditLog('Get Feedback')
     @Header('Cache-Control', 'none')
     findOne(@Param('feedbackId') feedbackId: string): Observable<ApiResponse> {
         let response = new ApiResponse();
@@ -66,6 +72,7 @@ export class FeedbackController {
     }
 
     @Put(':feedbackId')
+    @AuditLog('Update Feedback')
     @Header('Cache-Control', 'none')
     update(@Param('feedbackId') feedbackId: string, @Body() feedback: Feedback): Observable<ApiResponse> {
         let response = new ApiResponse();
@@ -97,6 +104,7 @@ export class FeedbackController {
     }
 
     @Delete(':feedbackId')
+    @AuditLog('Delete Feedback')
     @Header('Cache-Control', 'none')
     delete(@Param('feedbackId') feedbackId: string): Observable<ApiResponse> {
         let response = new ApiResponse();

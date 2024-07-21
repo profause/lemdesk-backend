@@ -10,6 +10,7 @@ import {
   Put,
   Query,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { Observable, map, switchMap, of } from 'rxjs';
 import { AuthTokenGuard } from 'src/modules/shared/guards/auth-token.guard';
@@ -21,7 +22,10 @@ import { UpdateResult } from 'typeorm';
 import { ServiceTicketComment } from '../models/service-ticket-comment.entity';
 import { ServiceTicket } from '../models/service-ticket.entity';
 import { TicketService } from '../services/service-ticket.service';
+import { AuditLog } from 'src/modules/audit-log/utils/audit-log.decorator';
+import { AuditLogInterceptor } from 'src/modules/audit-log/interceptors/audit-log.interceptor';
 
+@UseInterceptors(AuditLogInterceptor)
 @Controller('service-tickets')
 export class ServiceTicketController {
   private readonly logger = new Logger(ServiceTicketController.name);
@@ -29,6 +33,7 @@ export class ServiceTicketController {
 
   @UseGuards(AuthTokenGuard)
   @Post('')
+  @AuditLog('Create Service Ticket')
   @Header('Cache-Control', 'none')
   create(@Body() serviceTicket: ServiceTicket): Observable<ApiResponse> {
     let response = new ApiResponse();
@@ -46,6 +51,7 @@ export class ServiceTicketController {
 
   //@UseGuards(AuthTokenGuard)
   @Get('')
+  @AuditLog('Get Service Tickets')
   @Header('Cache-Control', 'none')
   findAll(
     @Query('page') page: number = 1,
@@ -73,6 +79,7 @@ export class ServiceTicketController {
 
   //@UseGuards(AuthTokenGuard)
   @Get('pending/:userId')
+  @AuditLog('Get pending Service Tickets')
   @Header('Cache-Control', 'none')
   findPending(
     @Param('userId') userId: string,
@@ -101,6 +108,7 @@ export class ServiceTicketController {
 
   //@UseGuards(AuthTokenGuard)
   @Get('assignedto/:userId')
+  @AuditLog('Get assigned Service Tickets')
   @Header('Cache-Control', 'none')
   findAssigned(
     @Param('userId') userId: string,
@@ -129,6 +137,7 @@ export class ServiceTicketController {
 
   //@UseGuards(AuthTokenGuard)
   @Get('initiatedby/:userId')
+  @AuditLog('Get initiated Service Tickets')
   @Header('Cache-Control', 'none')
   findInitiated(
     @Param('userId') userId: string,
@@ -157,6 +166,7 @@ export class ServiceTicketController {
 
   //@UseGuards(AuthTokenGuard)
   @Get('recently-closed/:userId')
+  @AuditLog('Get recently closed Service Tickets')
   @Header('Cache-Control', 'none')
   findRecentlyClosed(
     @Param('userId') userId: string,
@@ -184,6 +194,7 @@ export class ServiceTicketController {
   }
 
   @Get(':serviceTicketId')
+  @AuditLog('Get Service Ticket')
   @Header('Cache-Control', 'none')
   findOne(
     @Param('serviceTicketId') serviceTicketId: string,
@@ -205,6 +216,7 @@ export class ServiceTicketController {
   }
 
   @Put(':serviceTicketId')
+  @AuditLog('Update Service Ticket')
   @Header('Cache-Control', 'none')
   update(
     @Param('serviceTicketId') serviceTicketId: string,
@@ -240,6 +252,7 @@ export class ServiceTicketController {
   }
 
   @Delete(':serviceTicketId')
+  @AuditLog('Delete Service Ticket')
   @Header('Cache-Control', 'none')
   delete(
     @Param('serviceTicketId') serviceTicketId: string,
@@ -262,6 +275,7 @@ export class ServiceTicketController {
   //comments
   @UseGuards(AuthTokenGuard)
   @Post('comments')
+  @AuditLog('Create Service Ticket Comment')
   @Header('Cache-Control', 'none')
   createComment(
     @Body() serviceTicketComment: ServiceTicketComment,
@@ -281,6 +295,7 @@ export class ServiceTicketController {
 
   //@UseGuards(AuthTokenGuard)
   @Get('comments/:serviceTicketId')
+  @AuditLog('Get Service Ticket Comments')
   @Header('Cache-Control', 'none')
   findAllComment(
     @Param('serviceTicketId') serviceTicketId: string,
@@ -311,6 +326,7 @@ export class ServiceTicketController {
   }
 
   @Delete('comments/:serviceTicketCommentId')
+  @AuditLog('Delete Service Ticket Comment')
   @Header('Cache-Control', 'none')
   deleteComment(
     @Param('serviceTicketCommentId') serviceTicketCommentId: string,
@@ -331,6 +347,7 @@ export class ServiceTicketController {
   }
 
   @Put('comments/:serviceTicketCommentId')
+  @AuditLog('Update Service Ticket Comment')
   @Header('Cache-Control', 'none')
   updateComment(
     @Param('serviceTicketCommentId') serviceTicketCommentId: string,
@@ -364,4 +381,29 @@ export class ServiceTicketController {
       }),
     );
   }
+
+   //@UseGuards(AuthTokenGuard)
+   @Get('stats/:status')
+   @AuditLog('Get Service Ticket Stats')
+   @Header('Cache-Control', 'none')
+   stats(
+    @Param('status') status: string,
+   ): Observable<ApiResponse> {
+     let response = new ApiResponse();
+ 
+     return this.ticketService.findStats(status).pipe(
+       map((values) => {
+       const stats = {
+          pending: values[0],
+          open: values[1],
+          resolved: values[2],
+          closed: values[3],
+        }
+           response.code = ResponseCodes.SUCCESS.code;
+           response.message = ResponseCodes.SUCCESS.message;
+           response.data = stats;
+         return response;
+       }),
+     );
+   }
 }

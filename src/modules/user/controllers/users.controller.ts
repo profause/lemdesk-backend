@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Header, HttpCode, Logger, Param, Post, Put, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Header, HttpCode, Logger, Param, Post, Put, Query, UseGuards, UseInterceptors } from '@nestjs/common';
 import { map, Observable, of, switchMap } from 'rxjs';
 import { AuthTokenGuard } from 'src/modules/shared/guards/auth-token.guard';
 import { ApiResponse, ResponseCodes } from 'src/modules/shared/models/api-response';
@@ -6,7 +6,10 @@ import { UpdateResult } from 'typeorm';
 import { User } from '../models/user.entity';
 import { AuthService } from '../services/auth.service';
 import { UserService } from '../services/user.service';
+import { AuditLog } from 'src/modules/audit-log/utils/audit-log.decorator';
+import { AuditLogInterceptor } from 'src/modules/audit-log/interceptors/audit-log.interceptor';
 
+@UseInterceptors(AuditLogInterceptor)
 @Controller('users')
 export class UsersController {
     private readonly logger = new Logger(UsersController.name);
@@ -14,6 +17,7 @@ export class UsersController {
         public authService: AuthService) {
     }
     @Post('login')
+    @AuditLog('Login')
     @Header('Cache-Control', 'none')
     login(@Body() data: any): Observable<ApiResponse> {
         let response = new ApiResponse();
@@ -38,6 +42,7 @@ export class UsersController {
     }
 
     @Post('create')
+    @AuditLog('Create User')
     @Header('Cache-Control', 'none')
     create(@Body() user: User): Observable<ApiResponse> {
         let response = new ApiResponse();
@@ -51,6 +56,7 @@ export class UsersController {
     }
 
     @Get('')
+    @AuditLog('Get Users')
     @Header('Cache-Control', 'none')
     findAll(@Query('page') page: number = 1, @Query('limit') limit: number = 10): Observable<ApiResponse> {
         let response = new ApiResponse();
@@ -72,6 +78,7 @@ export class UsersController {
     }
 
     @Post('refreshtoken')
+    @AuditLog('Refresh Token')
     @Header('Cache-Control', 'none')
     refreshToken(@Body() data: any): Observable<ApiResponse> {
         let response = new ApiResponse();
@@ -94,6 +101,7 @@ export class UsersController {
 
     @UseGuards(AuthTokenGuard)
     @Get(':userId')
+    @AuditLog('Get User')
     @Header('Cache-Control', 'none')
     findOne(@Param('userId') userId: string): Observable<ApiResponse> {
         let response = new ApiResponse();
@@ -112,6 +120,7 @@ export class UsersController {
 
     @UseGuards(AuthTokenGuard)
     @Post('validatetoken')
+    @AuditLog('Validate Token')
     @Header('Cache-Control', 'none')
     @HttpCode(200)
     validateToken(@Body() user: User): Observable<ApiResponse> {
@@ -122,6 +131,7 @@ export class UsersController {
     }
 
     @Put(':userId')
+    @AuditLog('Update User')
     @Header('Cache-Control', 'none')
     update(@Param('userId') userId: string, @Body() user: User): Observable<ApiResponse> {
         let response = new ApiResponse();

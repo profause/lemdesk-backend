@@ -3,18 +3,22 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { User } from '../user/models/user.entity';
-import { Role } from '../role/models/role.entity';
-import { UserModule } from '../user/user.module';
-import { RoleModule } from '../role/role.module';
-import { SharedModule } from '../shared/shared.module';
-import { DepartmentModule } from '../department/department.module';
 import { Department } from '../department/models/department.entity';
-import { ServiceTicket } from '../service-management/models/service-ticket.entity';
-import { ServiceManagementModule } from '../service-management/service-management.module';
-import { ServiceTicketComment } from '../service-management/models/service-ticket-comment.entity';
 import { Feedback } from '../feedback/models/feedback.entity';
+import { Role } from '../role/models/role.entity';
+import { ServiceTicketComment } from '../service-management/models/service-ticket-comment.entity';
+import { ServiceTicket } from '../service-management/models/service-ticket.entity';
+import { User } from '../user/models/user.entity';
+import { DepartmentModule } from '../department/department.module';
 import { FeedbackModule } from '../feedback/feedback.module';
+import { RoleModule } from '../role/role.module';
+import { ServiceManagementModule } from '../service-management/service-management.module';
+import { SharedModule } from '../shared/shared.module';
+import { UserModule } from '../user/user.module';
+import { AuditLogModule } from '../audit-log/audit-log.module';
+import { AuditLogInterceptor } from '../audit-log/interceptors/audit-log.interceptor';
+import { AuditLog } from '../audit-log/models/audit-log.entity';
+import { APP_INTERCEPTOR } from '@nestjs/core';
 
 @Module({
   imports: [
@@ -26,25 +30,38 @@ import { FeedbackModule } from '../feedback/feedback.module';
     FeedbackModule,
     ConfigModule.forRoot({
       envFilePath: ['src/configFiles/.dev.env', 'src/configFiles/.prod.env'],
-      isGlobal: true
+      isGlobal: true,
     }),
     TypeOrmModule.forRoot({
       type: 'mysql',
-      url: process.env.DATABASE_URL,
+      //url: process.env.DATABASE_URL,
+      host: process.env.DB_HOST,
+      port: +process.env.DB_PORT,
+      username: process.env.DB_USERNAME,
+      password: process.env.DB_PASSWORD,
+      database: process.env.DB_NAME,
       entities: [
         User,
         Department,
         ServiceTicket,
         ServiceTicketComment,
         Role,
-        Feedback
+        Feedback,
+        AuditLog
       ],
-      synchronize: false,
+      logging: true,
+      //synchronize: true,
       //subscribers: [DepartmentSubscriber],
     }),
+    AuditLogModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
-  exports:[]
+  providers: [
+    AppService,
+    // {
+    //   provide: APP_INTERCEPTOR,
+    //   useClass: AuditLogInterceptor,
+    // },
+  ],
 })
 export class AppModule {}

@@ -1,16 +1,14 @@
-import { TypeOrmQueryService } from '@nestjs-query/query-typeorm';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { IPaginationOptions, paginate } from 'nestjs-typeorm-paginate';
-import { Observable, from, map, switchMap } from 'rxjs';
+import { Observable, from, map, of, switchMap } from 'rxjs';
 import { User } from 'src/modules/user/models/user.entity';
-import { UserService } from 'src/modules/user/services/user.service';
 import { Repository } from 'typeorm';
 import { ServiceTicketComment } from '../models/service-ticket-comment.entity';
 import { ServiceTicket } from '../models/service-ticket.entity';
 
 @Injectable()
-export class TicketService extends TypeOrmQueryService<ServiceTicket> {
+export class TicketService {
   constructor(
     @InjectRepository(ServiceTicket)
     public readonly ServiceTicketRepository: Repository<ServiceTicket>,
@@ -19,7 +17,7 @@ export class TicketService extends TypeOrmQueryService<ServiceTicket> {
     @InjectRepository(User)
     public readonly userRepository: Repository<User>,
   ) {
-    super(ServiceTicketRepository, { useSoftDelete: true });
+    //super(ServiceTicketRepository, { useSoftDelete: true });
   }
   public create(ServiceTicket: ServiceTicket): Observable<ServiceTicket> {
     //random assigned_to_id
@@ -88,8 +86,8 @@ export class TicketService extends TypeOrmQueryService<ServiceTicket> {
       }),
     );
 
-  public findOne = (ServiceTicketId: string) =>
-    from(this.ServiceTicketRepository.findOne(ServiceTicketId, {}));
+  public findOne = (id: string) =>
+    from(this.ServiceTicketRepository.findOneBy({ id }));
 
   public findOne1(ServiceTicketId: string) {
     const result = this.ServiceTicketRepository.createQueryBuilder(
@@ -119,18 +117,23 @@ export class TicketService extends TypeOrmQueryService<ServiceTicket> {
     options: IPaginationOptions,
   ) =>
     from(
-      paginate<ServiceTicket>(this.ServiceTicketCommentRepository, options, {
-        where: {
-          serviceTicketId: serviceTicketId,
+      paginate<ServiceTicketComment>(
+        this.ServiceTicketCommentRepository,
+        options,
+        {
+          where: {
+            serviceTicketId: serviceTicketId,
+          },
+          order: {
+            createdDate: 'ASC',
+          },
         },
-        order: {
-          createdDate: 'ASC',
-        },
-      }),
+      ),
     );
 
   public deleteComment = (serviceTicketCommentId: string) =>
     from(this.ServiceTicketCommentRepository.delete(serviceTicketCommentId));
+
   public updateComment = (serviceTicketComment: ServiceTicketComment) =>
     from(
       this.ServiceTicketCommentRepository.update(
@@ -138,8 +141,29 @@ export class TicketService extends TypeOrmQueryService<ServiceTicket> {
         serviceTicketComment,
       ),
     );
-  public findOneComment = (serviceTicketCommentId: string) =>
-    from(
-      this.ServiceTicketCommentRepository.findOne(serviceTicketCommentId, {}),
-    );
+  public findOneComment = (id: string) =>
+    from(this.ServiceTicketCommentRepository.findOneBy({ id }));
+
+  public findStats(status: string) {
+    let stats = {};
+    //return from(this.ServiceTicketRepository.find());
+    const pending = this.ServiceTicketRepository.countBy({
+      status: 'PENDING',
+    })
+
+    const open = this.ServiceTicketRepository.countBy({
+      status: 'OPEN',
+    })
+
+    const resolved = this.ServiceTicketRepository.countBy({
+      status: 'RESOLVED',
+    })
+
+    const closed = this.ServiceTicketRepository.countBy({
+      status: 'CLOSED',
+    })
+
+    return from(Promise.all([pending, open, resolved, closed]));
+    
+  }
 }

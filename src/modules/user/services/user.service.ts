@@ -1,4 +1,4 @@
-import { TypeOrmQueryService } from '@nestjs-query/query-typeorm';
+
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { IPaginationOptions, paginate } from 'nestjs-typeorm-paginate';
@@ -8,11 +8,11 @@ import { User } from '../models/user.entity';
 import { AuthService } from './auth.service';
 
 @Injectable()
-export class UserService extends TypeOrmQueryService<User> {
+export class UserService {
     constructor(@InjectRepository(User) public readonly userRepository: Repository<User>,
         public authService: AuthService
     ) {
-        super(userRepository, { useSoftDelete: true })
+        //super(userRepository, { useSoftDelete: true })
     }
     public create(user: User): Observable<User> {
         const createdUser = this.userRepository.create(user);
@@ -20,6 +20,6 @@ export class UserService extends TypeOrmQueryService<User> {
     }
     public update = (user: User) => from(this.userRepository.update(user.id, user));
     public findAll = (options: IPaginationOptions) => from(paginate<User>(this.userRepository, options));
-    public findOne = (userId: string) => from(this.userRepository.findOne(userId));
+    public findOne = (id: string) => from(this.userRepository.findOneBy({id}));
     public delete = (userId: string) => from(this.userRepository.delete(userId));
 }

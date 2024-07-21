@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Header, Logger, Param, Post, Put, Query } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Header, Logger, Param, Post, Put, Query, UseInterceptors } from '@nestjs/common';
 import { map, Observable, of, switchMap } from 'rxjs';
 import { ApiResponse, ResponseCodes } from 'src/modules/shared/models/api-response';
 import { AccessLevels, SystemRoles } from 'src/modules/shared/models/roles.enum';
@@ -6,7 +6,10 @@ import { SharedService } from 'src/modules/shared/services/shared.service';
 import { UpdateResult } from 'typeorm';
 import { Role } from '../models/role.entity';
 import { RoleService } from '../services/role/role.service';
+import { AuditLog } from 'src/modules/audit-log/utils/audit-log.decorator';
+import { AuditLogInterceptor } from 'src/modules/audit-log/interceptors/audit-log.interceptor';
 
+@UseInterceptors(AuditLogInterceptor)
 @Controller('role')
 export class RolesController {
     private readonly logger = new Logger(RolesController.name);
@@ -15,6 +18,7 @@ export class RolesController {
     }
 
     @Post('create')
+    @AuditLog('Create Role')
     @Header('Cache-Control', 'none')
     create(@Body() role: Role): Observable<ApiResponse> {
         let response = new ApiResponse();
@@ -28,6 +32,7 @@ export class RolesController {
     }
 
     @Put(':roleId')
+    @AuditLog('Update Role')
     @Header('Cache-Control', 'none')
     update(@Param('roleId') roleId: string, @Body() role: Role): Observable<ApiResponse> {
         let response = new ApiResponse();
@@ -59,6 +64,7 @@ export class RolesController {
     }
 
     @Get('findall')
+    @AuditLog('Get Roles')
     @Header('Cache-Control', 'none')
     findAll(): Observable<ApiResponse> {
         let response = new ApiResponse();
@@ -87,6 +93,7 @@ export class RolesController {
     }
 
     @Get(':roleId')
+    @AuditLog('Get Role')
     @Header('Cache-Control', 'none')
     findOne(@Param('roleId') roleId: string): Observable<ApiResponse> {
         let response = new ApiResponse();
@@ -104,6 +111,7 @@ export class RolesController {
     }
 
     @Delete(':roleId')
+    @AuditLog('Delete Role')
     @Header('Cache-Control', 'none')
     delete(@Param('roleId') roleId: string): Observable<ApiResponse> {
         let response = new ApiResponse();

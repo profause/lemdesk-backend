@@ -1,4 +1,3 @@
-import { TypeOrmQueryService } from '@nestjs-query/query-typeorm';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { IPaginationOptions, paginate } from 'nestjs-typeorm-paginate';
@@ -7,10 +6,10 @@ import { Repository } from 'typeorm';
 import { Feedback } from '../models/feedback.entity';
 
 @Injectable()
-export class FeedbackService extends TypeOrmQueryService<Feedback> {
+export class FeedbackService {
     constructor(@InjectRepository(Feedback) public readonly feedbackRepository: Repository<Feedback>,
     ) {
-        super(feedbackRepository, { useSoftDelete: true })
+        //super(feedbackRepository, { useSoftDelete: true })
     }
     public create(feedback: Feedback): Observable<Feedback> {
         const createdFeedback = this.feedbackRepository.create(feedback);
@@ -20,9 +19,7 @@ export class FeedbackService extends TypeOrmQueryService<Feedback> {
     public findAll = (options: IPaginationOptions) => from(paginate<Feedback>(this.feedbackRepository, options, {
         
     }));
-    public findOne = (feedbackId: string) => from(this.feedbackRepository.findOne(feedbackId, {
-        
-    }));
+    public findOne = (id: string) => from(this.feedbackRepository.findOneBy({id}));
 
     public findOne1(feedbackId: string) {
         const result = this.feedbackRepository.createQueryBuilder('feedback')
