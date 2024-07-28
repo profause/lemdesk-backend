@@ -72,7 +72,7 @@ export class TicketService {
       }),
     );
 
-  public findAllByStatus = (
+  public findAllByStatusByUserId = (
     userId: string,
     status: string,
     options: IPaginationOptions,
@@ -86,14 +86,27 @@ export class TicketService {
       }),
     );
 
+    public findAllByStatus = (
+      status: string,
+      options: IPaginationOptions,
+    ) =>
+      from(
+        paginate<ServiceTicket>(this.ServiceTicketRepository, options, {
+          where: {
+            status: status,
+          },
+        }),
+      );
+
   public findOne = (id: string) =>
     from(this.ServiceTicketRepository.findOneBy({ id }));
 
-  public findOne1(ServiceTicketId: string) {
+  public findOneBy(id: string) {
     const result = this.ServiceTicketRepository.createQueryBuilder(
       'ServiceTicket',
     )
-      .where({ id: ServiceTicketId })
+      .where({ id: id })
+      .orWhere({ trackingId: id })
       .getOne();
 
     return from(result);

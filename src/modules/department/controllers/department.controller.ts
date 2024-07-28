@@ -53,6 +53,7 @@ export class DepartmentController {
         }));
     }
 
+    @UseGuards(AuthTokenGuard)
     @Get(':departmentId')
     @AuditLog('Get Department')
     @Header('Cache-Control', 'none')
@@ -71,6 +72,7 @@ export class DepartmentController {
         }));
     }
 
+    @UseGuards(AuthTokenGuard)
     @Put(':departmentId')
     @AuditLog('Update Department')
     @Header('Cache-Control', 'none')
@@ -103,6 +105,7 @@ export class DepartmentController {
         )
     }
 
+    @UseGuards(AuthTokenGuard)
     @Delete(':departmentId')
     @AuditLog('Delete Department')
     @Header('Cache-Control', 'none')

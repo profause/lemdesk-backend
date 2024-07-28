@@ -9,8 +9,7 @@ export class DepartmentSubscriber implements EntitySubscriberInterface<Departmen
         return Department;
     }
 
-    constructor(private readonly connection: Connection,) {
-        connection.subscribers.push(this);
+    constructor() {
     }
 
     afterLoad(department: Department, event?: LoadEvent<Department>): void | Promise<any> {

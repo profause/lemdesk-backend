@@ -88,7 +88,7 @@ export class ServiceTicketController {
   ): Observable<ApiResponse> {
     let response = new ApiResponse();
 
-    return this.ticketService.findAllByStatus(userId,'PENDING',{ page, limit }).pipe(
+    return this.ticketService.findAllByStatusByUserId(userId,'PENDING',{ page, limit }).pipe(
       map((serviceTicketsPagable) => {
         const serviceTicketItems = serviceTicketsPagable.items;
         const serviceTicketItemsMeta = serviceTicketsPagable.meta;
@@ -168,6 +168,34 @@ export class ServiceTicketController {
   @Get('recently-closed/:userId')
   @AuditLog('Get recently closed Service Tickets')
   @Header('Cache-Control', 'none')
+  findRecentlyClosedByUserId(
+    @Param('userId') userId: string,
+    @Query('page') page: number = 1,
+    @Query('limit') limit: number = 10,
+  ): Observable<ApiResponse> {
+    let response = new ApiResponse();
+
+    return this.ticketService.findAllByStatusByUserId(userId,'CLOSED',{ page, limit }).pipe(
+      map((serviceTicketsPagable) => {
+        const serviceTicketItems = serviceTicketsPagable.items;
+        const serviceTicketItemsMeta = serviceTicketsPagable.meta;
+        if (serviceTicketItems.length > 0) {
+          response.code = ResponseCodes.SUCCESS.code;
+          response.message = ResponseCodes.SUCCESS.message;
+          response.data = serviceTicketItems;
+          response.meta = serviceTicketItemsMeta;
+        } else {
+          response.code = ResponseCodes.NO_RECORD_FOUND.code;
+          response.message = ResponseCodes.NO_RECORD_FOUND.message;
+        }
+        return response;
+      }),
+    );
+  }
+
+  @Get('recently-closed')
+  @AuditLog('Get recently closed Service Tickets')
+  @Header('Cache-Control', 'none')
   findRecentlyClosed(
     @Param('userId') userId: string,
     @Query('page') page: number = 1,
@@ -175,7 +203,7 @@ export class ServiceTicketController {
   ): Observable<ApiResponse> {
     let response = new ApiResponse();
 
-    return this.ticketService.findAllByStatus(userId,'CLOSED',{ page, limit }).pipe(
+    return this.ticketService.findAllByStatus('CLOSED',{ page, limit }).pipe(
       map((serviceTicketsPagable) => {
         const serviceTicketItems = serviceTicketsPagable.items;
         const serviceTicketItemsMeta = serviceTicketsPagable.meta;

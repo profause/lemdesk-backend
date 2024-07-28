@@ -24,24 +24,23 @@ export class AuditLogInterceptor implements NestInterceptor {
     next: CallHandler<any>,
   ): Observable<any> | Promise<Observable<any>> {
     const request = context.switchToHttp().getRequest();
+    const method = context.switchToHttp().getRequest().method;
     const auditLog = this.reflector.get<string>(
       'AUDIT_LOG_DATA',
       context.getHandler(),
     );
     this.logger.log(`[AUDIT LOG] ${auditLog}`);
+    this.logger.log(`[METHOD] ${method}`);
     return next.handle().pipe(
       switchMap((data) => {
         const requestBody = JSON.stringify(request.body).includes('password')
           ? {}
           : request.body;
-
-         //let tempData = data
-          //delete tempData.data.token;
-
+        const saveData = method == 'GET' ? {} : data;
         const body = {
           body: requestBody,
           params: request.params,
-          response: data,
+          response: saveData,
         };
         let audit = new AuditLog();
         audit.auditLog = auditLog;

@@ -77,6 +77,23 @@ export class UsersController {
         }));
     }
 
+    @Delete(':userId')
+    @AuditLog('Delete user')
+    @Header('Cache-Control', 'none')
+    delete(@Param('userId') userId: string): Observable<ApiResponse> {
+        let response = new ApiResponse();
+        return this.userService.delete(userId).pipe(map((role) => {
+            if (role.affected > 0) {
+                response.code = ResponseCodes.SUCCESS.code;
+                response.message = ResponseCodes.SUCCESS.message;
+            } else {
+                response.code = ResponseCodes.NO_RECORD_FOUND.code;
+                response.message = ResponseCodes.NO_RECORD_FOUND.message;
+            }
+            return response;
+        }));
+    }
+
     @Post('refreshtoken')
     @AuditLog('Refresh Token')
     @Header('Cache-Control', 'none')

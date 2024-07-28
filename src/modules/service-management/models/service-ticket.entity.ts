@@ -31,6 +31,9 @@ export class ServiceTicket extends BaseModel {
   @Column('varchar', { unique: false, name: 'assigned_to_department' })
   public assignedToDepartment?: string;
 
+  @Column('varchar', { unique: true, name: 'tracking_id' })
+  public trackingId?: string;
+
   @Column('varchar', {
     unique: false,
     name: 'assigned_to_resolver',
@@ -93,5 +96,8 @@ export class ServiceTicket extends BaseModel {
   public softDeleteDate: Date;
 
   @BeforeInsert()
-  beforeInsertListener() {}
+  beforeInsertListener() {
+    this.trackingId = Math.random().toString(36).substr(2, 9);
+  }
+
 }

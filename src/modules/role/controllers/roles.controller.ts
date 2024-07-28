@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Header, Logger, Param, Post, Put, Query, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Header, Logger, Param, Post, Put, Request, UseGuards, UseInterceptors } from '@nestjs/common';
 import { map, Observable, of, switchMap } from 'rxjs';
 import { ApiResponse, ResponseCodes } from 'src/modules/shared/models/api-response';
 import { AccessLevels, SystemRoles } from 'src/modules/shared/models/roles.enum';
@@ -8,6 +8,7 @@ import { Role } from '../models/role.entity';
 import { RoleService } from '../services/role/role.service';
 import { AuditLog } from 'src/modules/audit-log/utils/audit-log.decorator';
 import { AuditLogInterceptor } from 'src/modules/audit-log/interceptors/audit-log.interceptor';
+import { AuthTokenGuard } from 'src/modules/shared/guards/auth-token.guard';
 
 @UseInterceptors(AuditLogInterceptor)
 @Controller('role')
@@ -17,6 +18,7 @@ export class RolesController {
         private sharedService: SharedService) {
     }
 
+    @UseGuards(AuthTokenGuard)
     @Post('create')
     @AuditLog('Create Role')
     @Header('Cache-Control', 'none')
@@ -31,6 +33,7 @@ export class RolesController {
         }));
     }
 
+    @UseGuards(AuthTokenGuard)
     @Put(':roleId')
     @AuditLog('Update Role')
     @Header('Cache-Control', 'none')
@@ -63,10 +66,11 @@ export class RolesController {
         )
     }
 
+    @UseGuards(AuthTokenGuard)
     @Get('findall')
     @AuditLog('Get Roles')
     @Header('Cache-Control', 'none')
-    findAll(): Observable<ApiResponse> {
+    findAll(@Request() req): Observable<ApiResponse> {
         let response = new ApiResponse();
         response.code = ResponseCodes.SUCCESS.code;
         response.message = ResponseCodes.SUCCESS.message;
@@ -92,6 +96,7 @@ export class RolesController {
         // }));
     }
 
+    @UseGuards(AuthTokenGuard)
     @Get(':roleId')
     @AuditLog('Get Role')
     @Header('Cache-Control', 'none')
@@ -110,6 +115,7 @@ export class RolesController {
         }));
     }
 
+    @UseGuards(AuthTokenGuard)
     @Delete(':roleId')
     @AuditLog('Delete Role')
     @Header('Cache-Control', 'none')
